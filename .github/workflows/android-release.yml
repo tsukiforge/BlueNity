@@ -29,7 +29,18 @@ jobs:
       - name: Ensure gradlew is executable
         run: chmod +x gradlew
 
-      - name: Prepare Keystore from Secret (or Fallback Self-Signed)
+      - name: Restore Debug Keystore
+        run: |
+          if [ -f debug.keystore.base64 ]; then
+            base64 -d debug.keystore.base64 > debug.keystore
+          else
+            keytool -genkeypair -v -keystore debug.keystore -alias androiddebugkey \
+              -keyalg RSA -keysize 2048 -validity 10000 \
+              -storepass "android" -keypass "android" \
+              -dname "CN=Android Debug,O=Android,C=US"
+          fi
+
+      - name: Prepare Release Keystore from Secret (or Fallback Self-Signed)
         env:
           KEYSTORE_BASE64: ${{ secrets.KEYSTORE_BASE64 }}
           KEYSTORE_PASSWORD: ${{ secrets.STORE_PASSWORD }}

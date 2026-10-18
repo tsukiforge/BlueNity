@@ -1,0 +1,23 @@
+<resources>
+    <string name="app_name">Game Prep</string>
+    <string name="tab_home">Home</string>
+    <string name="tab_apps">App Manager</string>
+    <string name="tab_protected">Protected</string>
+    <string name="tab_profiles">Profil Game</string>
+    <string name="tab_memory">RAM Monitor</string>
+    <string name="tab_settings">Pengaturan</string>
+
+    <string name="action_prepare_game">Siapkan Game</string>
+    <string name="action_launch_game">Buka Game</string>
+    <string name="action_open_app_info">Buka Info Aplikasi</string>
+    <string name="action_refresh">Segarkan</string>
+    <string name="action_select_all">Pilih Semua</string>
+    <string name="action_clear_all">Batal Pilih</string>
+    
+    <string name="status_protected">Dilindungi</string>
+    <string name="status_selected">Terpilih</string>
+    <string name="status_game">Game</string>
+
+    <string name="low_memory_warning">Peringatan: Sistem dalam kondisi Low Memory!</string>
+    <string name="low_memory_normal">Status Memori: Normal</string>
+</resources>

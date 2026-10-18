@@ -1,0 +1,5 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Dokumentasi Arsitektur Game Prep
+    url: https://github.com
+    about: Baca penjelasan batasan memori Android, package visibility, dan optimasi Redmi 9A.

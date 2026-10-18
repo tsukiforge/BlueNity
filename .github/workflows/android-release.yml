@@ -1,0 +1,89 @@
+name: Android Full Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  release:
+    name: Build & Publish Release
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+          cache: 'gradle'
+
+      - name: Ensure gradlew is executable
+        run: |
+          if [ ! -f gradlew ]; then
+            gradle wrapper --gradle-version 8.11.1
+          fi
+          chmod +x gradlew
+
+      - name: Prepare Keystore from Secret (or Fallback Self-Signed)
+        env:
+          KEYSTORE_BASE64: ${{ secrets.KEYSTORE_BASE64 }}
+          KEYSTORE_PASSWORD: ${{ secrets.STORE_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
+          KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
+        run: |
+          mkdir -p release_keys
+          if [ -n "$KEYSTORE_BASE64" ]; then
+            echo "Decoding release keystore from GitHub Secrets..."
+            echo "$KEYSTORE_BASE64" | base64 -d > release_keys/upload-key.jks
+            echo "KEYSTORE_PATH=${GITHUB_WORKSPACE}/release_keys/upload-key.jks" >> $GITHUB_ENV
+            echo "STORE_PASSWORD=${KEYSTORE_PASSWORD}" >> $GITHUB_ENV
+            echo "KEY_ALIAS=${KEY_ALIAS}" >> $GITHUB_ENV
+            echo "KEY_PASSWORD=${KEY_PASSWORD}" >> $GITHUB_ENV
+          else
+            echo "Generating self-signed release keystore for CI..."
+            keytool -genkeypair -v -keystore release_keys/upload-key.jks -alias upload \
+              -keyalg RSA -keysize 2048 -validity 10000 \
+              -storepass "androidrelease" -keypass "androidrelease" \
+              -dname "CN=GamePrep, OU=Mobile, O=AIStudio, L=Jakarta, ST=Jakarta, C=ID"
+            echo "KEYSTORE_PATH=${GITHUB_WORKSPACE}/release_keys/upload-key.jks" >> $GITHUB_ENV
+            echo "STORE_PASSWORD=androidrelease" >> $GITHUB_ENV
+            echo "KEY_ALIAS=upload" >> $GITHUB_ENV
+            echo "KEY_PASSWORD=androidrelease" >> $GITHUB_ENV
+          fi
+
+      - name: Run Unit Tests
+        run: ./gradlew :app:testDebugUnitTest --no-daemon
+
+      - name: Build Release APK
+        run: ./gradlew :app:assembleRelease --no-daemon
+
+      - name: Build Release App Bundle (AAB)
+        run: ./gradlew :app:bundleRelease --no-daemon
+
+      - name: Rename Release Artifacts with Version
+        run: |
+          TAG_NAME="${GITHUB_REF#refs/tags/}"
+          mkdir -p dist
+          cp app/build/outputs/apk/release/*.apk "dist/GamePrep-${TAG_NAME}-release.apk"
+          if compgen -G "app/build/outputs/bundle/release/*.aab" > /dev/null; then
+            cp app/build/outputs/bundle/release/*.aab "dist/GamePrep-${TAG_NAME}-release.aab"
+          fi
+          ls -la dist/
+
+      - name: Create GitHub Release & Upload Assets
+        uses: softprops/action-gh-release@v2
+        with:
+          files: dist/*
+          name: Release ${{ github.ref_name }}
+          draft: false
+          prerelease: false
+          generate_release_notes: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

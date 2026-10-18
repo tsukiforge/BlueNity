@@ -1,0 +1,6 @@
+{
+  "name": "Game Prep",
+  "description": "App manager non-root berkinerja tinggi untuk perangkat RAM 2 GB (Redmi 9A) guna mempersiapkan smartphone sebelum bermain game.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

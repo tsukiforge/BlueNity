@@ -125,6 +125,7 @@ class MainActivity : ComponentActivity() {
                                     uiState = uiState,
                                     onRefreshMemory = { viewModel.refreshMemory() },
                                     onPrepareGameClicked = { viewModel.showPrepareConfirmation() },
+                                    onQuickCleanClicked = { viewModel.quickTrimBackgroundApps() },
                                     onLaunchGameClicked = { viewModel.launchGame(uiState.activeProfile?.gamePackageName) },
                                     onNavigateToApps = { currentTab = NavigationTab.APPS },
                                     onNavigateToProtected = { currentTab = NavigationTab.PROTECTED }

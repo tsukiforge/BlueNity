@@ -49,6 +49,7 @@ fun HomeScreen(
     uiState: GamePrepUiState,
     onRefreshMemory: () -> Unit,
     onPrepareGameClicked: () -> Unit,
+    onQuickCleanClicked: () -> Unit,
     onLaunchGameClicked: () -> Unit,
     onNavigateToApps: () -> Unit,
     onNavigateToProtected: () -> Unit,
@@ -56,6 +57,7 @@ fun HomeScreen(
 ) {
     val scrollState = rememberScrollState()
     val activeProfile = uiState.activeProfile
+    val hasGamePackage = !activeProfile?.gamePackageName.isNullOrBlank()
 
     Column(
         modifier = modifier
@@ -85,7 +87,11 @@ fun HomeScreen(
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Column {
+                    Column(
+                        modifier = Modifier
+                            .weight(1f)
+                            .padding(end = 12.dp)
+                    ) {
                         Text(
                             text = "Profil Aktif",
                             style = MaterialTheme.typography.labelMedium,
@@ -119,7 +125,7 @@ fun HomeScreen(
 
                 Spacer(modifier = Modifier.height(12.dp))
 
-                val gameStatusText = if (!activeProfile?.gamePackageName.isNullOrBlank()) {
+                val gameStatusText = if (hasGamePackage) {
                     "Paket Game: ${activeProfile?.gamePackageName}"
                 } else {
                     "Belum ada aplikasi game yang dikaitkan."
@@ -138,16 +144,12 @@ fun HomeScreen(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.spacedBy(10.dp)
                 ) {
-                    Button(
-                        onClick = onPrepareGameClicked,
+                    FilledTonalButton(
+                        onClick = onQuickCleanClicked,
                         modifier = Modifier
                             .weight(1f)
                             .height(50.dp)
-                            .testTag("home_prepare_game_button"),
-                        colors = ButtonDefaults.buttonColors(
-                            containerColor = MaterialTheme.colorScheme.primary,
-                            contentColor = MaterialTheme.colorScheme.onPrimary
-                        ),
+                            .testTag("home_quick_clean_button"),
                         shape = RoundedCornerShape(12.dp)
                     ) {
                         Icon(
@@ -157,18 +159,22 @@ fun HomeScreen(
                         )
                         Spacer(modifier = Modifier.width(6.dp))
                         Text(
-                            text = "Siapkan Game",
+                            text = "Bersihkan RAM",
                             fontWeight = FontWeight.Bold
                         )
                     }
 
-                    if (!activeProfile?.gamePackageName.isNullOrBlank()) {
-                        FilledTonalButton(
+                    if (hasGamePackage) {
+                        Button(
                             onClick = onLaunchGameClicked,
                             modifier = Modifier
                                 .weight(1f)
                                 .height(50.dp)
                                 .testTag("home_launch_game_button"),
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = MaterialTheme.colorScheme.primary,
+                                contentColor = MaterialTheme.colorScheme.onPrimary
+                            ),
                             shape = RoundedCornerShape(12.dp)
                         ) {
                             Icon(
@@ -178,10 +184,57 @@ fun HomeScreen(
                             )
                             Spacer(modifier = Modifier.width(6.dp))
                             Text(
-                                text = "Buka Game",
+                                text = "Mulai Game",
                                 fontWeight = FontWeight.Bold
                             )
                         }
+                    } else {
+                        Button(
+                            onClick = onPrepareGameClicked,
+                            modifier = Modifier
+                                .weight(1f)
+                                .height(50.dp)
+                                .testTag("home_prepare_game_button"),
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = MaterialTheme.colorScheme.primary,
+                                contentColor = MaterialTheme.colorScheme.onPrimary
+                            ),
+                            shape = RoundedCornerShape(12.dp)
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Security,
+                                contentDescription = null,
+                                modifier = Modifier.size(18.dp)
+                            )
+                            Spacer(modifier = Modifier.width(6.dp))
+                            Text(
+                                text = "Persiapan Teliti",
+                                fontWeight = FontWeight.Bold
+                            )
+                        }
+                    }
+                }
+
+                if (hasGamePackage) {
+                    Spacer(modifier = Modifier.height(10.dp))
+                    OutlinedButton(
+                        onClick = onPrepareGameClicked,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(44.dp)
+                            .testTag("home_prepare_game_button"),
+                        shape = RoundedCornerShape(12.dp)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Security,
+                            contentDescription = null,
+                            modifier = Modifier.size(16.dp)
+                        )
+                        Spacer(modifier = Modifier.width(6.dp))
+                        Text(
+                            text = "Persiapan Teliti (Force Stop Sistem)",
+                            style = MaterialTheme.typography.labelLarge
+                        )
                     }
                 }
             }

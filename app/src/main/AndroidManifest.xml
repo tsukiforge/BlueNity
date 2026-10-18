@@ -2,6 +2,9 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
 
+    <!-- Standard normal install-time permission for background memory reclaim before game launch -->
+    <uses-permission android:name="android.permission.KILL_BACKGROUND_PROCESSES" />
+
     <!-- Zero-privileged, pure non-root app manager.
          No dangerous permissions required. Package visibility adheres strictly to Google Play policy. -->
     <queries>

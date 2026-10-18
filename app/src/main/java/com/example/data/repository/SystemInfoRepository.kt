@@ -114,4 +114,25 @@ class SystemInfoRepository(private val context: Context) {
             false
         }
     }
+
+    /**
+     * Reclaims background caches and processes for specified non-protected packages
+     * using the official ActivityManager.killBackgroundProcesses API.
+     * Safe, non-root, system-supported action prior to launching games.
+     */
+    fun trimBackgroundProcesses(packageNames: List<String>): Int {
+        var count = 0
+        for (pkg in packageNames) {
+            try {
+                if (pkg != context.packageName && pkg.isNotBlank()) {
+                    activityManager.killBackgroundProcesses(pkg)
+                    count++
+                }
+            } catch (_: Exception) {
+                // Ignore restricted system packages gracefully
+            }
+        }
+        System.gc()
+        return count
+    }
 }

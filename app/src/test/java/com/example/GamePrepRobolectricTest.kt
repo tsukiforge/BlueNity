@@ -211,4 +211,11 @@ class GamePrepRobolectricTest {
         val launchResult = repo.launchApp("com.nonexistent.fake.package")
         assertTrue(launchResult.isFailure)
     }
+
+    @Test
+    fun testTrimBackgroundProcesses() {
+        val repo = SystemInfoRepository(context)
+        val trimmed = repo.trimBackgroundProcesses(listOf("com.android.chrome", "com.example.otherapp"))
+        assertTrue(trimmed >= 0)
+    }
 }

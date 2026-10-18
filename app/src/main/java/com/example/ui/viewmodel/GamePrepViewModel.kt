@@ -238,13 +238,54 @@ class GamePrepViewModel(
         }
     }
 
+    /**
+     * Instantly reclaims background caches for all selected, non-protected apps
+     * using the official Android ActivityManager.killBackgroundProcesses API.
+     */
+    fun quickTrimBackgroundApps(): Int {
+        val targets = _uiState.value.apps.filter { it.isSelected && !it.isProtected }.map { it.packageName }
+        val count = if (targets.isNotEmpty()) {
+            systemInfoRepository.trimBackgroundProcesses(targets)
+        } else {
+            0
+        }
+        refreshMemory()
+        val msg = if (count > 0) {
+            "Berhasil membersihkan $count proses latar belakang dari RAM."
+        } else {
+            "Tidak ada aplikasi latar belakang terpilih untuk dibersihkan. Centang aplikasi di tab Kelola Aplikasi terlebih dahulu."
+        }
+        _uiState.update { it.copy(message = msg) }
+        return count
+    }
+
+    /**
+     * Automatically cleans selected background apps from memory, then launches the target game.
+     */
     fun launchGame(packageName: String?) {
         if (packageName.isNullOrBlank()) {
             _uiState.update { it.copy(message = "Belum ada paket game yang diatur untuk profil ini.") }
             return
         }
+
+        // Automatic background memory reclaim before launch
+        val targets = _uiState.value.apps.filter { it.isSelected && !it.isProtected }.map { it.packageName }
+        val trimmedCount = if (targets.isNotEmpty()) {
+            systemInfoRepository.trimBackgroundProcesses(targets)
+        } else {
+            0
+        }
+        refreshMemory()
+
         val result = systemInfoRepository.launchApp(packageName)
-        result.onFailure { error ->
+        result.onSuccess {
+            val feedback = if (trimmedCount > 0) {
+                "RAM dibersihkan ($trimmedCount aplikasi latar belakang) & meluncurkan game..."
+            } else {
+                "Meluncurkan game..."
+            }
+            _uiState.update { it.copy(message = feedback) }
+        }.onFailure { error ->
             _uiState.update { it.copy(message = error.localizedMessage ?: "Gagal meluncurkan game") }
         }
     }

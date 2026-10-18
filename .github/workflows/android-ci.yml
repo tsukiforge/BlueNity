@@ -1,20 +1,18 @@
-name: Android CI
+name: Android CI (PR Validation)
 
 on:
-  push:
-    branches: [ "main", "master" ]
   pull_request:
     branches: [ "main", "master" ]
 
 concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
+  group: pr-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
-  build:
-    name: Build & Test Android App
+  validate:
+    name: Validate Pull Request
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 25
 
     steps:
       - name: Checkout Repository
@@ -37,10 +35,8 @@ jobs:
       - name: Restore Debug Keystore
         run: |
           if [ -f debug.keystore.base64 ]; then
-            echo "Restoring debug.keystore from debug.keystore.base64..."
             base64 -d debug.keystore.base64 > debug.keystore
           else
-            echo "Generating new debug.keystore..."
             keytool -genkeypair -v -keystore debug.keystore -alias androiddebugkey \
               -keyalg RSA -keysize 2048 -validity 10000 \
               -storepass "android" -keypass "android" \
@@ -60,10 +56,3 @@ jobs:
           name: unit-test-reports
           path: app/build/reports/tests/testDebugUnitTest/
           retention-days: 7
-
-      - name: Upload Debug APK
-        uses: actions/upload-artifact@v4
-        with:
-          name: game-prep-debug-apk
-          path: app/build/outputs/apk/debug/*.apk
-          retention-days: 14

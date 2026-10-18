@@ -13,10 +13,10 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowForward
+import androidx.compose.material.icons.automirrored.filled.ArrowForward
+import androidx.compose.material.icons.automirrored.filled.Launch
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Close
-import androidx.compose.material.icons.filled.Launch
 import androidx.compose.material.icons.filled.SportsEsports
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -245,7 +245,7 @@ fun GuidedPrepDialog(
                             )
                         ) {
                             Icon(
-                                imageVector = Icons.Default.Launch,
+                                imageVector = Icons.AutoMirrored.Filled.Launch,
                                 contentDescription = null,
                                 modifier = Modifier.size(18.dp)
                             )
@@ -267,7 +267,7 @@ fun GuidedPrepDialog(
                             )
                             Spacer(modifier = Modifier.width(6.dp))
                             Icon(
-                                imageVector = Icons.Default.ArrowForward,
+                                imageVector = Icons.AutoMirrored.Filled.ArrowForward,
                                 contentDescription = null,
                                 modifier = Modifier.size(16.dp)
                             )

@@ -133,11 +133,11 @@ class AppManagerRepository(private val context: Context) {
 
                 val isSystem = (appInfo.flags and ApplicationInfo.FLAG_SYSTEM) != 0
 
+                @Suppress("DEPRECATION")
                 val isGame = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                     appInfo.category == ApplicationInfo.CATEGORY_GAME ||
                             (appInfo.flags and ApplicationInfo.FLAG_IS_GAME) != 0
                 } else {
-                    @Suppress("DEPRECATION")
                     (appInfo.flags and ApplicationInfo.FLAG_IS_GAME) != 0
                 }
 

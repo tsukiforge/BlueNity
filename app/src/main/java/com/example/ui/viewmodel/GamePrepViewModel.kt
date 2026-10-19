@@ -59,9 +59,7 @@ data class GamePrepUiState(
     val themeMode: String = "SYSTEM",
     val pendingProtectedAppToSelect: AppItem? = null,
     val showConfirmPrepDialog: Boolean = false,
-    val profileToDelete: GameProfile? = null,
-    val notificationBlockingEnabled: Boolean = false,
-    val notificationAccessEnabled: Boolean = false
+    val profileToDelete: GameProfile? = null
 ) {
     val activeProfile: GameProfile?
         get() = profiles.find { it.id == activeProfileId } ?: profiles.firstOrNull()
@@ -108,22 +106,6 @@ class GamePrepViewModel(
     init {
         loadData()
         refreshMemory()
-        loadNotificationSetting()
-    }
-
-    private fun loadNotificationSetting() {
-        viewModelScope.launch {
-            preferencesRepository.notificationBlockingEnabledFlow.collect { enabled ->
-                _uiState.update { it.copy(notificationBlockingEnabled = enabled) }
-            }
-        }
-        refreshNotificationAccess()
-    }
-
-    fun refreshNotificationAccess() {
-        _uiState.update {
-            it.copy(notificationAccessEnabled = systemInfoRepository.isNotificationListenerEnabled())
-        }
     }
 
     private fun loadData() {
@@ -294,25 +276,16 @@ class GamePrepViewModel(
         }
     }
 
-    fun setNotificationBlockingEnabled(enabled: Boolean) {
-        viewModelScope.launch {
-            preferencesRepository.setNotificationBlockingEnabled(enabled)
-            _uiState.update {
-                it.copy(message = if (enabled) "Blokir notifikasi diaktifkan." else "Blokir notifikasi dimatikan.")
-            }
-        }
-    }
-
-    fun openNotificationListenerSettings() {
-        systemInfoRepository.openNotificationListenerSettings().onFailure { error ->
-            _uiState.update { it.copy(message = error.localizedMessage ?: "Pengaturan akses notifikasi tidak tersedia") }
-        }
-    }
-
     fun openBatterySettings() {
         val result = systemInfoRepository.openBatterySettings()
         result.onFailure { error ->
             _uiState.update { it.copy(message = error.localizedMessage ?: "Gagal membuka pengaturan baterai") }
+        }
+    }
+
+    fun openDoNotDisturbSettings() {
+        systemInfoRepository.openDoNotDisturbSettings().onFailure { error ->
+            _uiState.update { it.copy(message = error.localizedMessage ?: "Pengaturan Jangan Ganggu tidak tersedia") }
         }
     }
 

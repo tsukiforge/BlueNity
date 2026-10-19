@@ -4,7 +4,6 @@ import android.content.Context
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.edit
-import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.core.stringSetPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
@@ -26,7 +25,6 @@ class PreferencesRepository(private val context: Context) {
         val ACTIVE_PROFILE_ID = stringPreferencesKey("active_profile_id")
         val PROFILES_JSON = stringPreferencesKey("profiles_json")
         val THEME_MODE = stringPreferencesKey("theme_mode")
-        val NOTIFICATION_BLOCKING_ENABLED = booleanPreferencesKey("notification_blocking_enabled")
     }
 
     val selectedPackagesFlow: Flow<Set<String>> = context.dataStore.data.map { preferences ->
@@ -47,10 +45,6 @@ class PreferencesRepository(private val context: Context) {
 
     val themeModeFlow: Flow<String> = context.dataStore.data.map { preferences ->
         preferences[PreferencesKeys.THEME_MODE] ?: "SYSTEM"
-    }
-
-    val notificationBlockingEnabledFlow: Flow<Boolean> = context.dataStore.data.map { preferences ->
-        preferences[PreferencesKeys.NOTIFICATION_BLOCKING_ENABLED] ?: false
     }
 
     val profilesFlow: Flow<List<GameProfile>> = context.dataStore.data.map { preferences ->
@@ -139,16 +133,6 @@ class PreferencesRepository(private val context: Context) {
         context.dataStore.edit { preferences ->
             preferences[PreferencesKeys.THEME_MODE] = theme
         }
-    }
-
-    suspend fun setNotificationBlockingEnabled(enabled: Boolean) {
-        context.dataStore.edit { preferences ->
-            preferences[PreferencesKeys.NOTIFICATION_BLOCKING_ENABLED] = enabled
-        }
-        context.getSharedPreferences(NotificationBlockerService.PREFS_NAME, Context.MODE_PRIVATE)
-            .edit()
-            .putBoolean(NotificationBlockerService.KEY_ENABLED, enabled)
-            .apply()
     }
 
     companion object {

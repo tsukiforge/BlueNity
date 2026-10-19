@@ -64,11 +64,6 @@ class MainActivity : ComponentActivity() {
         GamePrepViewModel.provideFactory(application)
     }
 
-    override fun onResume() {
-        super.onResume()
-        viewModel.refreshNotificationAccess()
-    }
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
@@ -179,13 +174,7 @@ class MainActivity : ComponentActivity() {
                                     uiState = uiState,
                                     onSetThemeMode = { viewModel.setThemeMode(it) },
                                     onOpenBatterySettings = { viewModel.openBatterySettings() },
-                                    onNotificationBlockingChanged = { enabled ->
-                                        viewModel.setNotificationBlockingEnabled(enabled)
-                                        if (enabled && !uiState.notificationAccessEnabled) {
-                                            viewModel.openNotificationListenerSettings()
-                                        }
-                                    },
-                                    onOpenNotificationSettings = { viewModel.openNotificationListenerSettings() }
+                                    onOpenDoNotDisturbSettings = { viewModel.openDoNotDisturbSettings() }
                                 )
                             }
                         }

@@ -137,7 +137,7 @@ class SystemInfoRepository(private val context: Context) {
     fun openDoNotDisturbSettings(): Result<Boolean> {
         return try {
             context.startActivity(
-                Intent(Settings.ACTION_ZEN_MODE_SETTINGS)
+                Intent("android.settings.ZEN_MODE_SETTINGS")
                     .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
             )
             Result.success(true)

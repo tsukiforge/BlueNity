@@ -16,6 +16,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import java.util.UUID
 
@@ -58,7 +59,9 @@ data class GamePrepUiState(
     val themeMode: String = "SYSTEM",
     val pendingProtectedAppToSelect: AppItem? = null,
     val showConfirmPrepDialog: Boolean = false,
-    val profileToDelete: GameProfile? = null
+    val profileToDelete: GameProfile? = null,
+    val notificationBlockingEnabled: Boolean = false,
+    val notificationAccessEnabled: Boolean = false
 ) {
     val activeProfile: GameProfile?
         get() = profiles.find { it.id == activeProfileId } ?: profiles.firstOrNull()
@@ -105,6 +108,22 @@ class GamePrepViewModel(
     init {
         loadData()
         refreshMemory()
+        loadNotificationSetting()
+    }
+
+    private fun loadNotificationSetting() {
+        viewModelScope.launch {
+            preferencesRepository.notificationBlockingEnabledFlow.collect { enabled ->
+                _uiState.update { it.copy(notificationBlockingEnabled = enabled) }
+            }
+        }
+        refreshNotificationAccess()
+    }
+
+    fun refreshNotificationAccess() {
+        _uiState.update {
+            it.copy(notificationAccessEnabled = systemInfoRepository.isNotificationListenerEnabled())
+        }
     }
 
     private fun loadData() {
@@ -242,51 +261,51 @@ class GamePrepViewModel(
      * Instantly reclaims background caches for all selected, non-protected apps
      * using the official Android ActivityManager.killBackgroundProcesses API.
      */
-    fun quickTrimBackgroundApps(): Int {
+    fun quickTrimBackgroundApps() {
         val targets = _uiState.value.apps.filter { it.isSelected && !it.isProtected }.map { it.packageName }
-        val count = if (targets.isNotEmpty()) {
-            systemInfoRepository.trimBackgroundProcesses(targets)
-        } else {
-            0
+        if (targets.isEmpty()) {
+            _uiState.update { it.copy(message = "Tidak ada aplikasi non-protected yang dipilih.") }
+            return
         }
-        refreshMemory()
-        val msg = if (count > 0) {
-            "Berhasil membersihkan $count proses latar belakang dari RAM."
-        } else {
-            "Tidak ada aplikasi latar belakang terpilih untuk dibersihkan. Centang aplikasi di tab Kelola Aplikasi terlebih dahulu."
+        _uiState.update { it.copy(message = "Pembersihan manual sedang diproses...") }
+        viewModelScope.launch(Dispatchers.IO) {
+            val count = systemInfoRepository.trimBackgroundProcesses(targets)
+            refreshMemory()
+            _uiState.update {
+                it.copy(message = "Selesai. $count aplikasi diproses; Android tetap menentukan proses mana yang dapat dihentikan.")
+            }
         }
-        _uiState.update { it.copy(message = msg) }
-        return count
     }
 
     /**
      * Automatically cleans selected background apps from memory, then launches the target game.
      */
-    fun launchGame(packageName: String?) {
+    fun launchGame(packageName: String?, onLaunched: (() -> Unit)? = null) {
         if (packageName.isNullOrBlank()) {
             _uiState.update { it.copy(message = "Belum ada paket game yang diatur untuk profil ini.") }
             return
         }
 
-        // Automatic background memory reclaim before launch
-        val targets = _uiState.value.apps.filter { it.isSelected && !it.isProtected }.map { it.packageName }
-        val trimmedCount = if (targets.isNotEmpty()) {
-            systemInfoRepository.trimBackgroundProcesses(targets)
-        } else {
-            0
-        }
-        refreshMemory()
-
         val result = systemInfoRepository.launchApp(packageName)
         result.onSuccess {
-            val feedback = if (trimmedCount > 0) {
-                "RAM dibersihkan ($trimmedCount aplikasi latar belakang) & meluncurkan game..."
-            } else {
-                "Meluncurkan game..."
-            }
-            _uiState.update { it.copy(message = feedback) }
+            onLaunched?.invoke()
         }.onFailure { error ->
             _uiState.update { it.copy(message = error.localizedMessage ?: "Gagal meluncurkan game") }
+        }
+    }
+
+    fun setNotificationBlockingEnabled(enabled: Boolean) {
+        viewModelScope.launch {
+            preferencesRepository.setNotificationBlockingEnabled(enabled)
+            _uiState.update {
+                it.copy(message = if (enabled) "Blokir notifikasi diaktifkan." else "Blokir notifikasi dimatikan.")
+            }
+        }
+    }
+
+    fun openNotificationListenerSettings() {
+        systemInfoRepository.openNotificationListenerSettings().onFailure { error ->
+            _uiState.update { it.copy(message = error.localizedMessage ?: "Pengaturan akses notifikasi tidak tersedia") }
         }
     }
 
@@ -306,6 +325,8 @@ class GamePrepViewModel(
                 // If profile has saved selected packages, load them
                 if (profile.selectedPackages.isNotEmpty()) {
                     preferencesRepository.saveSelectedPackages(profile.selectedPackages)
+                } else {
+                    preferencesRepository.clearSelectedPackages()
                 }
                 _uiState.update { it.copy(message = "Profil ${profile.name} diaktifkan.") }
             }

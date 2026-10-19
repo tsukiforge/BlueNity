@@ -35,6 +35,17 @@ Aplikasi ini dibangun dengan prinsip kejujuran sistemik (**Pure Non-Root & Syste
    - Panduan pengaturan Autostart dan Penghemat Baterai MIUI.
    - Pintasan langsung ke pengaturan baterai sistem tanpa meminta izin berbahaya.
 
+7. **Blokir Notifikasi (Opsional):**
+   - Menggunakan `NotificationListenerService` resmi Android setelah pengguna memberikan akses secara manual di Pengaturan.
+   - Notifikasi tidak dibaca atau disimpan; service hanya menghapus notifikasi yang masuk ketika fitur aktif.
+   - Akses dapat dicabut kapan saja dari Pengaturan Android. Beberapa notifikasi sistem/OEM mungkin tetap tampil.
+
+### Catatan performa
+
+- Tombol **Mulai Game** tidak lagi menjalankan pembersihan proses otomatis dan tidak memanggil `System.gc()`, karena kedua tindakan tersebut dapat menyebabkan stutter pada perangkat RAM rendah.
+- Setelah game berhasil dibuka, Activity Game Prep ditutup agar komposisi UI, ikon, dan state layar dilepas lebih cepat.
+- **Bersihkan RAM** adalah tindakan manual best-effort dan diproses di background. Android/MIUI tetap menentukan proses mana yang boleh dihentikan.
+
 ---
 
 ## 🏛️ Arsitektur & Teknologi

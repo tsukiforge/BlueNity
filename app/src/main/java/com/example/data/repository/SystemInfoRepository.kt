@@ -116,9 +116,8 @@ class SystemInfoRepository(private val context: Context) {
     }
 
     /**
-     * Reclaims background caches and processes for specified non-protected packages
-     * using the official ActivityManager.killBackgroundProcesses API.
-     * Safe, non-root, system-supported action prior to launching games.
+     * Best-effort manual cleanup for user-selected packages. This is never called
+     * automatically when launching a game because OEMs may restart killed processes.
      */
     fun trimBackgroundProcesses(packageNames: List<String>): Int {
         var count = 0
@@ -132,7 +131,27 @@ class SystemInfoRepository(private val context: Context) {
                 // Ignore restricted system packages gracefully
             }
         }
-        System.gc()
         return count
+    }
+
+    fun isNotificationListenerEnabled(): Boolean {
+        val enabled = Settings.Secure.getString(
+            context.contentResolver,
+            "enabled_notification_listeners"
+        ) ?: return false
+        val expected = "${context.packageName}/${NotificationBlockerService::class.java.name}"
+        return enabled.split(':').any { it == expected }
+    }
+
+    fun openNotificationListenerSettings(): Result<Boolean> {
+        return try {
+            context.startActivity(
+                Intent("android.settings.ACTION_NOTIFICATION_LISTENER_SETTINGS")
+                    .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+            )
+            Result.success(true)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
     }
 }

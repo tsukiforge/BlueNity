@@ -2,7 +2,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
 
-    <!-- Standard normal install-time permission for background memory reclaim before game launch -->
+    <!-- Optional normal permission for the user-invoked, best-effort cleanup button. -->
     <uses-permission android:name="android.permission.KILL_BACKGROUND_PROCESSES" />
 
     <!-- Zero-privileged, pure non-root app manager.
@@ -52,6 +52,15 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <service
+            android:name=".data.repository.NotificationBlockerService"
+            android:label="Pemblokir notifikasi Game Prep"
+            android:permission="android.permission.BIND_NOTIFICATION_LISTENER_SERVICE"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.service.notification.NotificationListenerService" />
+            </intent-filter>
+        </service>
     </application>
 
 </manifest>

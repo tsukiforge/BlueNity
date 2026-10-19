@@ -64,6 +64,11 @@ class MainActivity : ComponentActivity() {
         GamePrepViewModel.provideFactory(application)
     }
 
+    override fun onResume() {
+        super.onResume()
+        viewModel.refreshNotificationAccess()
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
@@ -126,7 +131,11 @@ class MainActivity : ComponentActivity() {
                                     onRefreshMemory = { viewModel.refreshMemory() },
                                     onPrepareGameClicked = { viewModel.showPrepareConfirmation() },
                                     onQuickCleanClicked = { viewModel.quickTrimBackgroundApps() },
-                                    onLaunchGameClicked = { viewModel.launchGame(uiState.activeProfile?.gamePackageName) },
+                                    onLaunchGameClicked = {
+                                        viewModel.launchGame(uiState.activeProfile?.gamePackageName) {
+                                            finishAndRemoveTask()
+                                        }
+                                    },
                                     onNavigateToApps = { currentTab = NavigationTab.APPS },
                                     onNavigateToProtected = { currentTab = NavigationTab.PROTECTED }
                                 )
@@ -169,7 +178,14 @@ class MainActivity : ComponentActivity() {
                                 SettingsScreen(
                                     uiState = uiState,
                                     onSetThemeMode = { viewModel.setThemeMode(it) },
-                                    onOpenBatterySettings = { viewModel.openBatterySettings() }
+                                    onOpenBatterySettings = { viewModel.openBatterySettings() },
+                                    onNotificationBlockingChanged = { enabled ->
+                                        viewModel.setNotificationBlockingEnabled(enabled)
+                                        if (enabled && !uiState.notificationAccessEnabled) {
+                                            viewModel.openNotificationListenerSettings()
+                                        }
+                                    },
+                                    onOpenNotificationSettings = { viewModel.openNotificationListenerSettings() }
                                 )
                             }
                         }
@@ -206,7 +222,11 @@ class MainActivity : ComponentActivity() {
                                 onOpenAppInfo = { viewModel.openAppInfo(it) },
                                 onNextStep = { viewModel.nextGuidedPrepStep() },
                                 onCancel = { viewModel.cancelGuidedPrep() },
-                                onLaunchGame = { viewModel.launchGame(uiState.activeProfile?.gamePackageName) },
+                                onLaunchGame = {
+                                    viewModel.launchGame(uiState.activeProfile?.gamePackageName) {
+                                        finishAndRemoveTask()
+                                    }
+                                },
                                 activeGamePackage = uiState.activeProfile?.gamePackageName
                             )
                         }

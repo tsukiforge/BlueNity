@@ -240,8 +240,8 @@ class GamePrepViewModel(
     }
 
     /**
-     * Instantly reclaims background caches for all selected, non-protected apps
-     * using the official Android ActivityManager.killBackgroundProcesses API.
+     * Best-effort stops selected, non-protected background processes using the
+     * official Android ActivityManager API. This does not clear app cache.
      */
     fun quickTrimBackgroundApps() {
         val targets = _uiState.value.apps.filter { it.isSelected && !it.isProtected }.map { it.packageName }
@@ -249,12 +249,12 @@ class GamePrepViewModel(
             _uiState.update { it.copy(message = "Tidak ada aplikasi non-protected yang dipilih.") }
             return
         }
-        _uiState.update { it.copy(message = "Pembersihan manual sedang diproses...") }
+        _uiState.update { it.copy(message = "Menghentikan proses latar belakang...") }
         viewModelScope.launch(Dispatchers.IO) {
             val count = systemInfoRepository.trimBackgroundProcesses(targets)
             refreshMemory()
             _uiState.update {
-                it.copy(message = "Selesai. $count aplikasi diproses; Android tetap menentukan proses mana yang dapat dihentikan.")
+                it.copy(message = "Selesai. $count aplikasi diproses. Cache aplikasi tidak dihapus; Android tetap menentukan proses mana yang dapat dihentikan.")
             }
         }
     }

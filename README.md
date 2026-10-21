@@ -39,7 +39,7 @@ Aplikasi ini dibangun dengan prinsip kejujuran sistemik (**Pure Non-Root & Syste
 
 - Tombol **Mulai Game** tidak lagi menjalankan pembersihan proses otomatis dan tidak memanggil `System.gc()`, karena kedua tindakan tersebut dapat menyebabkan stutter pada perangkat RAM rendah.
 - Setelah game berhasil dibuka, Activity Game Prep ditutup agar komposisi UI, ikon, dan state layar dilepas lebih cepat.
-- **Bersihkan RAM** adalah tindakan manual best-effort dan diproses di background. Android/MIUI tetap menentukan proses mana yang boleh dihentikan.
+- **Hentikan Proses** adalah tindakan manual best-effort untuk proses latar belakang yang dipilih dan diproses di background. Fitur ini tidak menghapus cache aplikasi; Android/MIUI tetap menentukan proses mana yang boleh dihentikan.
 
 ---
 

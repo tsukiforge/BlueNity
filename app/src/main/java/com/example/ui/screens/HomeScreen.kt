@@ -159,7 +159,7 @@ fun HomeScreen(
                         )
                         Spacer(modifier = Modifier.width(6.dp))
                         Text(
-                            text = "Bersihkan RAM",
+                            text = "Hentikan Proses",
                             fontWeight = FontWeight.Bold
                         )
                     }

@@ -1,6 +1,6 @@
 # ==============================================================================
 # PROGUARD & R8 PRODUCTION SHRINKING & OBFUSCATION CONFIGURATION
-# Specifically tuned for Low-RAM devices (e.g. Xiaomi Redmi 9A, 2GB RAM)
+# Specifically tuned for Low-RAM devices (2GB - 3GB RAM)
 # ==============================================================================
 
 # ------------------------------------------------------------------------------

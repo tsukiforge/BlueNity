@@ -218,4 +218,18 @@ class GamePrepRobolectricTest {
         val trimmed = repo.trimBackgroundProcesses(listOf("com.android.chrome", "com.example.otherapp"))
         assertTrue(trimmed >= 0)
     }
+
+    @Test
+    fun testClearAppInternalCache() {
+        val repo = SystemInfoRepository(context)
+        val freed = repo.clearAppInternalCache()
+        assertTrue(freed >= 0L)
+    }
+
+    @Test
+    fun testOpenAppStorageSettings() {
+        val repo = SystemInfoRepository(context)
+        val result = repo.openAppStorageSettings(context.packageName)
+        assertTrue(result.isSuccess)
+    }
 }

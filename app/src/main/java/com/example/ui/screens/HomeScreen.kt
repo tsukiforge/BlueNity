@@ -159,7 +159,7 @@ fun HomeScreen(
                         )
                         Spacer(modifier = Modifier.width(6.dp))
                         Text(
-                            text = "Hentikan Proses",
+                            text = "Hentikan & Bersihkan",
                             fontWeight = FontWeight.Bold
                         )
                     }
@@ -314,7 +314,7 @@ fun HomeScreen(
             }
         }
 
-        // Redmi 9A 2GB RAM Information Card
+        // Low-RAM Devices Information Card
         Card(
             modifier = Modifier.fillMaxWidth(),
             shape = RoundedCornerShape(16.dp),
@@ -324,7 +324,7 @@ fun HomeScreen(
         ) {
             Column(modifier = Modifier.padding(16.dp)) {
                 Text(
-                    text = "Prinsip Kerja Game Prep pada Redmi 9A",
+                    text = "Prinsip Kerja pada Perangkat RAM Rendah",
                     style = MaterialTheme.typography.titleSmall,
                     fontWeight = FontWeight.Bold,
                     color = MaterialTheme.colorScheme.primary
@@ -334,7 +334,7 @@ fun HomeScreen(
                     text = "• Pure Non-Root: Menghormati batasan keamanan Android resmi tanpa trik palsu.\n" +
                             "• Persiapan Terpandu: Membantu Anda membuka Info Aplikasi sistem untuk melakukan Force Stop resmi.\n" +
                             "• Perlindungan Panggilan: Telepon, SMS, dan Jam Alarm secara otomatis dikecualikan agar aktivitas penting tidak terganggu.\n" +
-                            "• Zero-Bloat: Game Prep berbobot sangat ringan agar tidak membebani sisa RAM 2 GB Anda.",
+                            "• Zero-Bloat: Game Prep berbobot sangat ringan agar tidak membebani sisa RAM perangkat Anda.",
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )

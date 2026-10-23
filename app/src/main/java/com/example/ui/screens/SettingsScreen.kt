@@ -115,7 +115,7 @@ fun SettingsScreen(
             }
         }
 
-        // MIUI 12 & Redmi 9A Battery Optimization Guide
+        // Low-RAM Devices & Battery Optimization Guide
         Card(
             modifier = Modifier.fillMaxWidth(),
             shape = RoundedCornerShape(16.dp),
@@ -131,7 +131,7 @@ fun SettingsScreen(
                     )
                     Spacer(modifier = Modifier.width(8.dp))
                     Text(
-                        text = "Tips MIUI 12 & Optimasi Baterai",
+                        text = "Tips Optimasi Baterai & Latar Belakang",
                         style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.Bold,
                         color = MaterialTheme.colorScheme.onSurface
@@ -139,10 +139,10 @@ fun SettingsScreen(
                 }
                 Spacer(modifier = Modifier.height(8.dp))
                 Text(
-                    text = "Pada Xiaomi Redmi 9A dengan MIUI 12:\n" +
-                            "• Menu Autostart (Mulai Otomatis) di aplikasi Keamanan (Security) mengontrol aplikasi yang dapat berjalan otomatis di latar belakang.\n" +
-                            "• Penghemat Baterai MIUI dapat membatasi aktivitas latar belakang untuk aplikasi non-esensial.\n" +
-                            "• Game Prep tidak mematikan fitur keamanan MIUI secara diam-diam demi menjaga stabilitas sistem Anda.",
+                    text = "Pada Perangkat RAM Rendah (2 - 3 GB):\n" +
+                            "• Menu Mulai Otomatis (Autostart) di pengaturan sistem mengontrol aplikasi yang dapat berjalan otomatis di latar belakang.\n" +
+                            "• Penghemat Baterai sistem dapat membatasi aktivitas latar belakang untuk aplikasi non-esensial.\n" +
+                            "• Game Prep tidak mematikan fitur keamanan sistem secara diam-diam demi menjaga stabilitas sistem Anda.",
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
@@ -234,8 +234,8 @@ fun SettingsScreen(
                 Spacer(modifier = Modifier.height(6.dp))
                 Text(
                     text = "Versi: 1.0 (Production-Ready)\n" +
-                            "Target: Redmi 9A (RAM 2 GB, MIUI 12, Android 10/11+)\n" +
-                            "ID Aplikasi: com.aistudio.gameprep.optimizer\n" +
+                            "Target: Perangkat RAM Rendah (RAM 2 - 3 GB, Android 10+)\n" +
+                            "ID Aplikasi: com.gameprep.optimizer\n" +
                             "Toolkit: Jetpack Compose & Material Design 3",
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant

@@ -2,7 +2,7 @@ package com.example.ui.theme
 
 import androidx.compose.ui.graphics.Color
 
-// High-contrast, gaming-focused Material 3 palette optimized for Redmi 9A LCD screen
+// High-contrast, gaming-focused Material 3 palette optimized for high visibility and power-efficiency
 val GamingBackgroundDark = Color(0xFF0F141C)
 val GamingSurfaceDark = Color(0xFF181F2C)
 val GamingSurfaceVariantDark = Color(0xFF222B3D)

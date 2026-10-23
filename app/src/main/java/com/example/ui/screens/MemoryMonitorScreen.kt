@@ -286,7 +286,7 @@ fun MemoryMonitorScreen(
                 Text(
                     text = "1. Tidak Ada 'Pembersihan Ajaib': Di Android modern, memori bebas yang tidak digunakan adalah memori yang terbuang. Kernel Linux sengaja menggunakan RAM untuk cache buffer disk agar membuka aplikasi lebih cepat.\n\n" +
                             "2. Force Stop Resmi: Menutup aplikasi melalui halaman Info Aplikasi sistem secara resmi menghentikan proses latar belakang dan mencegahnya langsung hidup kembali, memberikan ruang fisik lebih luas bagi game berat seperti Mobile Legends atau Roblox.\n\n" +
-                            "3. Tidak Menjanjikan Peningkatan FPS: Stabilitas game pada perangkat RAM 2 GB (seperti Redmi 9A) dipengaruhi oleh GPU PowerVR GE8320 dan chipset Helio G25. Menutup aplikasi latar belakang mencegah game ditutup paksa (crash OOM) oleh Android LMK, bukan mengubah kemampuan grafis perangkat.",
+                            "3. Tidak Menjanjikan Peningkatan FPS: Stabilitas game pada perangkat RAM rendah (2 - 3 GB) dipengaruhi oleh GPU dan chipset perangkat. Menutup aplikasi latar belakang mencegah game ditutup paksa (crash OOM) oleh Android LMK, bukan mengubah kemampuan grafis fisik perangkat.",
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )

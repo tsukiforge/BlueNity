@@ -240,22 +240,38 @@ class GamePrepViewModel(
     }
 
     /**
-     * Best-effort stops selected, non-protected background processes using the
-     * official Android ActivityManager API. This does not clear app cache.
+     * Stops selected, non-protected background processes and safely clears internal app cache
+     * in full compliance with Google Play Store policies (no root, no prohibited hidden APIs).
      */
     fun quickTrimBackgroundApps() {
         val targets = _uiState.value.apps.filter { it.isSelected && !it.isProtected }.map { it.packageName }
         if (targets.isEmpty()) {
-            _uiState.update { it.copy(message = "Tidak ada aplikasi non-protected yang dipilih.") }
+            _uiState.update { it.copy(message = "Tidak ada aplikasi non-protected yang dipilih. Centang aplikasi di tab Kelola Aplikasi terlebih dahulu.") }
             return
         }
-        _uiState.update { it.copy(message = "Menghentikan proses latar belakang...") }
+        _uiState.update { it.copy(message = "Menghentikan proses & membersihkan cache aman...") }
         viewModelScope.launch(Dispatchers.IO) {
             val count = systemInfoRepository.trimBackgroundProcesses(targets)
+            val cacheFreedBytes = systemInfoRepository.clearAppInternalCache()
             refreshMemory()
+
+            val cacheFreedKb = cacheFreedBytes / 1024L
+            val cacheInfo = if (cacheFreedKb > 0) " dan $cacheFreedKb KB cache internal dibersihkan" else " dan cache internal dibersihkan"
             _uiState.update {
-                it.copy(message = "Selesai. $count aplikasi diproses. Cache aplikasi tidak dihapus; Android tetap menentukan proses mana yang dapat dihentikan.")
+                it.copy(
+                    message = "Selesai. $count proses latar belakang dihentikan$cacheInfo secara aman sesuai kebijakan resmi Google Play Store."
+                )
             }
+        }
+    }
+
+    /**
+     * Safely opens Storage & Cache screen for a package so the user can clear app cache directly.
+     */
+    fun openAppStorage(packageName: String) {
+        val result = systemInfoRepository.openAppStorageSettings(packageName)
+        result.onFailure { error ->
+            _uiState.update { it.copy(message = error.localizedMessage ?: "Gagal membuka pengaturan penyimpanan") }
         }
     }
 

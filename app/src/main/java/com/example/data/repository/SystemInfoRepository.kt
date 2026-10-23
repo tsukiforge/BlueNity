@@ -9,6 +9,7 @@ import android.os.Debug
 import android.os.Process
 import android.provider.Settings
 import com.example.data.model.MemoryStats
+import java.io.File
 
 class SystemInfoRepository(private val context: Context) {
 
@@ -152,6 +153,50 @@ class SystemInfoRepository(private val context: Context) {
                 Result.failure(e)
             }
         }
+    }
+
+    /**
+     * Safely clears Game Prep's own internal cache and code cache.
+     * 100% compliant with Google Play Store policies (does not violate app sandbox or request prohibited permissions).
+     * Returns the total number of bytes freed.
+     */
+    fun clearAppInternalCache(): Long {
+        var bytesFreed = 0L
+        try {
+            bytesFreed += deleteDir(context.cacheDir)
+            bytesFreed += deleteDir(context.codeCacheDir)
+            context.externalCacheDir?.let {
+                bytesFreed += deleteDir(it)
+            }
+        } catch (_: Exception) {
+            // Ignore minor file access exceptions
+        }
+        return bytesFreed
+    }
+
+    private fun deleteDir(dir: File?): Long {
+        if (dir == null || !dir.exists()) return 0L
+        var totalBytes = 0L
+        val children = dir.listFiles() ?: return 0L
+        for (child in children) {
+            if (child.isDirectory) {
+                totalBytes += deleteDir(child)
+            } else {
+                val len = child.length()
+                if (child.delete()) {
+                    totalBytes += len
+                }
+            }
+        }
+        return totalBytes
+    }
+
+    /**
+     * Safely opens the Storage & Cache screen of any target application using standard Android Settings Intent.
+     * This is the official, Google Play approved way for users to clear an application's external/internal cache.
+     */
+    fun openAppStorageSettings(packageName: String): Result<Boolean> {
+        return openAppInfo(packageName)
     }
 
 }

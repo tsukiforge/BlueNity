@@ -1,6 +1,6 @@
 # Game Prep — Production-Ready Non-Root App Manager
 
-**Game Prep** adalah aplikasi pengelola aplikasi sebelum bermain game yang dirancang khusus untuk smartphone Android dengan RAM terbatas, terutama **Xiaomi Redmi 9A (RAM 2 GB, MIUI 12, Android 10/11+)**.
+**Game Prep** adalah aplikasi pengelola aplikasi sebelum bermain game yang dirancang khusus untuk smartphone Android dengan RAM terbatas (**Perangkat RAM Rendah 2 GB - 3 GB, Android 10+**).
 
 Aplikasi ini dibangun dengan prinsip kejujuran sistemik (**Pure Non-Root & System Transparency**). Tidak ada klaim palsu "membersihkan 2 GB RAM", tidak ada tombol bohongan, tidak menggunakan Accessibility Service untuk klik otomatis tersembunyi, dan tidak memerlukan Shizuku maupun akses root.
 
@@ -38,8 +38,7 @@ Aplikasi ini dibangun dengan prinsip kejujuran sistemik (**Pure Non-Root & Syste
 ### Catatan performa
 
 - Tombol **Mulai Game** tidak lagi menjalankan pembersihan proses otomatis dan tidak memanggil `System.gc()`, karena kedua tindakan tersebut dapat menyebabkan stutter pada perangkat RAM rendah.
-- Setelah game berhasil dibuka, Activity Game Prep ditutup agar komposisi UI, ikon, dan state layar dilepas lebih cepat.
-- **Hentikan Proses** adalah tindakan manual best-effort untuk proses latar belakang yang dipilih dan diproses di background. Fitur ini tidak menghapus cache aplikasi; Android/MIUI tetap menentukan proses mana yang boleh dihentikan.
+- **Hentikan & Bersihkan** adalah tindakan manual untuk menghentikan proses latar belakang yang dipilih serta membersihkan cache internal Game Prep secara aman tanpa melanggar kebijakan Google Play Store (tanpa izin berbahaya atau manipulasi direktori aplikasi lain). Untuk membersihkan cache file besar dari aplikasi pihak ketiga, Game Prep menyediakan akses langsung ke menu resmi Info Aplikasi > Penyimpanan & Cache.
 
 ---
 
@@ -52,7 +51,7 @@ Aplikasi ini dibangun dengan prinsip kejujuran sistemik (**Pure Non-Root & Syste
 - **Penyimpanan Lokal:** Jetpack DataStore Preferences
 - **Minimum SDK:** API 29 (Android 10)
 - **Target SDK:** API 36
-- **Package ID:** `com.aistudio.gameprep.optimizer`
+- **Package ID:** `com.gameprep.optimizer`
 
 ### Struktur Direktori:
 ```
@@ -139,14 +138,14 @@ Proyek ini telah dikonfigurasi dengan alur kerja GitHub Actions otomatis:
 gradle :app:testDebugUnitTest
 ```
 
-### 3. Memasang & Menguji di Xiaomi Redmi 9A:
-1. Aktifkan **Opsi Pengembang (Developer Options)** di Redmi 9A:
+### 5. Memasang & Menguji di Perangkat Fisik (Low-RAM Device):
+1. Aktifkan **Opsi Pengembang (Developer Options)** di perangkat:
    - Masuk ke **Pengaturan** -> **Tentang Ponsel**.
-   - Ketuk **Versi MIUI** sebanyak 7 kali berturut-turut hingga muncul pesan pengembang.
+   - Ketuk **Nomor Bentukan (Build Number)** atau versi sistem sebanyak 7 kali berturut-turut hingga muncul pesan pengembang.
 2. Aktifkan **Debugging USB** di menu Opsi Pengembang.
-3. Hubungkan Redmi 9A ke komputer menggunakan kabel data.
+3. Hubungkan smartphone ke komputer menggunakan kabel data.
 4. Pasang APK menggunakan ADB:
    ```bash
-   adb install -r app/build/outputs/apk/debug/app-debug.apk
+   adb install -r app/build/outputs/apk/release/app-release.apk
    ```
 5. Buka Game Prep, periksa daftar aplikasi, lakukan persiapan terpandu pada salah satu game (misal Mobile Legends), dan amati stabilitas RAM.

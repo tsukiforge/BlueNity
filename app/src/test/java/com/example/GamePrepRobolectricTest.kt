@@ -232,4 +232,25 @@ class GamePrepRobolectricTest {
         val result = repo.openAppStorageSettings(context.packageName)
         assertTrue(result.isSuccess)
     }
+
+    @Test
+    fun testPerformSafeClean() {
+        val repo = SystemInfoRepository(context)
+        val cleanResult = repo.performSafeClean(listOf("com.android.chrome"))
+        assertTrue(cleanResult.processedAppsCount >= 0)
+        assertTrue(cleanResult.internalCacheFreedBytes >= 0L)
+        assertTrue(cleanResult.ramFreedBytes >= 0L)
+        assertTrue(cleanResult.afterAvailMemBytes >= 0L)
+    }
+
+    @Test
+    fun testQuickCleanNotificationHelper() {
+        com.example.notification.QuickCleanNotificationHelper.createNotificationChannel(context)
+        com.example.notification.QuickCleanNotificationHelper.showNotification(
+            context = context,
+            statusTitle = "Game Prep Test",
+            statusSubtitle = "RAM Tersedia: 1000 MB"
+        )
+        com.example.notification.QuickCleanNotificationHelper.cancelNotification(context)
+    }
 }

@@ -3,6 +3,7 @@ package com.example.data.repository
 import android.content.Context
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
+import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.core.stringSetPreferencesKey
@@ -25,6 +26,7 @@ class PreferencesRepository(private val context: Context) {
         val ACTIVE_PROFILE_ID = stringPreferencesKey("active_profile_id")
         val PROFILES_JSON = stringPreferencesKey("profiles_json")
         val THEME_MODE = stringPreferencesKey("theme_mode")
+        val NOTIFICATION_WIDGET_ENABLED = booleanPreferencesKey("notification_widget_enabled")
     }
 
     val selectedPackagesFlow: Flow<Set<String>> = context.dataStore.data.map { preferences ->
@@ -45,6 +47,10 @@ class PreferencesRepository(private val context: Context) {
 
     val themeModeFlow: Flow<String> = context.dataStore.data.map { preferences ->
         preferences[PreferencesKeys.THEME_MODE] ?: "SYSTEM"
+    }
+
+    val notificationWidgetEnabledFlow: Flow<Boolean> = context.dataStore.data.map { preferences ->
+        preferences[PreferencesKeys.NOTIFICATION_WIDGET_ENABLED] ?: true
     }
 
     val profilesFlow: Flow<List<GameProfile>> = context.dataStore.data.map { preferences ->
@@ -132,6 +138,12 @@ class PreferencesRepository(private val context: Context) {
     suspend fun setThemeMode(theme: String) {
         context.dataStore.edit { preferences ->
             preferences[PreferencesKeys.THEME_MODE] = theme
+        }
+    }
+
+    suspend fun setNotificationWidgetEnabled(enabled: Boolean) {
+        context.dataStore.edit { preferences ->
+            preferences[PreferencesKeys.NOTIFICATION_WIDGET_ENABLED] = enabled
         }
     }
 

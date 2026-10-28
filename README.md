@@ -35,6 +35,11 @@ Aplikasi ini dibangun dengan prinsip kejujuran sistemik (**Pure Non-Root & Syste
    - Panduan pengaturan Autostart dan Penghemat Baterai MIUI.
    - Pintasan langsung ke pengaturan baterai sistem tanpa meminta izin berbahaya.
 
+7. **Action Center (Quick Settings Tile) & Notifikasi Interaktif:**
+   - Ubin Quick Settings resmi (`TileService`) di Action Center / Quick Settings Android (di sebelah WiFi & Senter).
+   - Pengguna cukup membuka notifikasi/Action Center, klik **"Hapus Cache"**, dan seketika muncul notifikasi laporan nyata berisi berapa MB RAM dan KB cache yang berhasil dibebaskan.
+   - Bersifat fleksibel dan tidak mengganggu: notifikasi tidak dikunci permanen (`ongoing = false`) sehingga dapat di-swipe hapus setelah dibaca.
+
 ### Catatan performa
 
 - Tombol **Mulai Game** tidak lagi menjalankan pembersihan proses otomatis dan tidak memanggil `System.gc()`, karena kedua tindakan tersebut dapat menyebabkan stutter pada perangkat RAM rendah.

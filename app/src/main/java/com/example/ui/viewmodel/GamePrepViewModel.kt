@@ -11,6 +11,7 @@ import com.example.data.model.MemoryStats
 import com.example.data.repository.AppManagerRepository
 import com.example.data.repository.PreferencesRepository
 import com.example.data.repository.SystemInfoRepository
+import com.example.notification.QuickCleanNotificationHelper
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -18,6 +19,7 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import java.util.Locale
 import java.util.UUID
 
 enum class AppFilter {
@@ -59,7 +61,8 @@ data class GamePrepUiState(
     val themeMode: String = "SYSTEM",
     val pendingProtectedAppToSelect: AppItem? = null,
     val showConfirmPrepDialog: Boolean = false,
-    val profileToDelete: GameProfile? = null
+    val profileToDelete: GameProfile? = null,
+    val isNotificationWidgetEnabled: Boolean = true
 ) {
     val activeProfile: GameProfile?
         get() = profiles.find { it.id == activeProfileId } ?: profiles.firstOrNull()
@@ -106,6 +109,7 @@ class GamePrepViewModel(
     init {
         loadData()
         refreshMemory()
+        QuickCleanNotificationHelper.showNotification(application)
     }
 
     private fun loadData() {
@@ -126,7 +130,11 @@ class GamePrepViewModel(
                 Triple(profiles, activeId, theme)
             }
 
-            combine(packagePrefsFlow, profilePrefsFlow) { (selectedPkgs, userProtected, overrides), (profiles, activeId, theme) ->
+            combine(
+                packagePrefsFlow,
+                profilePrefsFlow,
+                preferencesRepository.notificationWidgetEnabledFlow
+            ) { (selectedPkgs, userProtected, overrides), (profiles, activeId, theme), notifEnabled ->
                 val currentActiveId = activeId ?: profiles.firstOrNull()?.id
                 val activeProf = profiles.find { it.id == currentActiveId }
                 val gamePkg = activeProf?.gamePackageName
@@ -144,8 +152,15 @@ class GamePrepViewModel(
                         profiles = profiles,
                         activeProfileId = currentActiveId,
                         themeMode = theme,
+                        isNotificationWidgetEnabled = notifEnabled,
                         isLoading = false
                     )
+                }
+
+                if (notifEnabled) {
+                    QuickCleanNotificationHelper.showNotification(getApplication())
+                } else {
+                    QuickCleanNotificationHelper.cancelNotification(getApplication())
                 }
             }.collect {}
         }
@@ -240,8 +255,8 @@ class GamePrepViewModel(
     }
 
     /**
-     * Stops selected, non-protected background processes and safely clears internal app cache
-     * in full compliance with Google Play Store policies (no root, no prohibited hidden APIs).
+     * Stops selected, non-protected background processes and safely clears internal app cache.
+     * Computes genuine real MB of RAM and KB of cache freed directly from the OS.
      */
     fun quickTrimBackgroundApps() {
         val targets = _uiState.value.apps.filter { it.isSelected && !it.isProtected }.map { it.packageName }
@@ -249,18 +264,51 @@ class GamePrepViewModel(
             _uiState.update { it.copy(message = "Tidak ada aplikasi non-protected yang dipilih. Centang aplikasi di tab Kelola Aplikasi terlebih dahulu.") }
             return
         }
-        _uiState.update { it.copy(message = "Menghentikan proses & membersihkan cache aman...") }
+        _uiState.update { it.copy(message = "Menghitung dan membersihkan cache serta proses latar belakang...") }
         viewModelScope.launch(Dispatchers.IO) {
-            val count = systemInfoRepository.trimBackgroundProcesses(targets)
-            val cacheFreedBytes = systemInfoRepository.clearAppInternalCache()
+            val result = systemInfoRepository.performSafeClean(targets)
             refreshMemory()
 
-            val cacheFreedKb = cacheFreedBytes / 1024L
-            val cacheInfo = if (cacheFreedKb > 0) " dan $cacheFreedKb KB cache internal dibersihkan" else " dan cache internal dibersihkan"
+            val ramFreedMb = result.ramFreedBytes / (1024.0 * 1024.0)
+            val cacheFreedKb = result.internalCacheFreedBytes / 1024L
+            val afterAvailMb = result.afterAvailMemBytes / (1024 * 1024)
+
+            val msg = if (ramFreedMb > 0.05) {
+                "Selesai! ${result.processedAppsCount} aplikasi diproses: Nyata membebaskan ${String.format(Locale.getDefault(), "%.1f MB", ramFreedMb)} RAM & $cacheFreedKb KB cache (Sisa RAM: $afterAvailMb MB)."
+            } else {
+                "Selesai! ${result.processedAppsCount} aplikasi diproses: $cacheFreedKb KB cache internal dibersihkan (RAM saat ini: $afterAvailMb MB)."
+            }
+
             _uiState.update {
-                it.copy(
-                    message = "Selesai. $count proses latar belakang dihentikan$cacheInfo secara aman sesuai kebijakan resmi Google Play Store."
+                it.copy(message = msg)
+            }
+
+            // Sync with Notification Center
+            if (_uiState.value.isNotificationWidgetEnabled) {
+                val subtitle = if (ramFreedMb > 0.05) {
+                    "Membebaskan ${String.format(Locale.getDefault(), "%.1f MB", ramFreedMb)} RAM & $cacheFreedKb KB cache"
+                } else {
+                    "Cache internal dibersihkan ($afterAvailMb MB RAM tersedia)"
+                }
+                QuickCleanNotificationHelper.showNotification(
+                    context = getApplication(),
+                    statusTitle = "Game Prep: Selesai Dibersihkan",
+                    statusSubtitle = subtitle
                 )
+            }
+        }
+    }
+
+    fun setNotificationWidgetEnabled(enabled: Boolean) {
+        viewModelScope.launch {
+            preferencesRepository.setNotificationWidgetEnabled(enabled)
+            _uiState.update { it.copy(isNotificationWidgetEnabled = enabled) }
+            if (enabled) {
+                QuickCleanNotificationHelper.showNotification(getApplication())
+                _uiState.update { it.copy(message = "Tombol Hapus Cache di Notification Center diaktifkan.") }
+            } else {
+                QuickCleanNotificationHelper.cancelNotification(getApplication())
+                _uiState.update { it.copy(message = "Notifikasi di Notification Center dinonaktifkan.") }
             }
         }
     }

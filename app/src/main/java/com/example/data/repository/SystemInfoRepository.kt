@@ -199,4 +199,40 @@ class SystemInfoRepository(private val context: Context) {
         return openAppInfo(packageName)
     }
 
+    /**
+     * Executes safe, real cleanup:
+     * 1. Measures genuine hardware available RAM before cleanup.
+     * 2. Clears Game Prep's internal file cache.
+     * 3. Halts background processes of selected apps.
+     * 4. Measures genuine available RAM after cleanup to return real, non-fake stats.
+     */
+    fun performSafeClean(packageNames: List<String>): CleanResult {
+        val beforeAvail = getMemoryStats().availMemBytes
+        val cacheFreed = clearAppInternalCache()
+        val count = trimBackgroundProcesses(packageNames)
+
+        try {
+            Thread.sleep(150)
+        } catch (_: Exception) {}
+
+        val afterAvail = getMemoryStats().availMemBytes
+        val ramFreed = (afterAvail - beforeAvail).coerceAtLeast(0L)
+
+        return CleanResult(
+            processedAppsCount = count,
+            internalCacheFreedBytes = cacheFreed,
+            ramFreedBytes = ramFreed,
+            beforeAvailMemBytes = beforeAvail,
+            afterAvailMemBytes = afterAvail
+        )
+    }
+
 }
+
+data class CleanResult(
+    val processedAppsCount: Int,
+    val internalCacheFreedBytes: Long,
+    val ramFreedBytes: Long,
+    val beforeAvailMemBytes: Long,
+    val afterAvailMemBytes: Long
+)

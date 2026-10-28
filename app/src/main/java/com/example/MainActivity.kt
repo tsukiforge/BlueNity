@@ -1,11 +1,18 @@
 package com.example
 
+import android.Manifest
+import android.content.pm.PackageManager
+import android.os.Build
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.BackHandler
+import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
+import androidx.core.content.ContextCompat
+import com.example.notification.QuickCleanNotificationHelper
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
@@ -76,6 +83,26 @@ class MainActivity : ComponentActivity() {
                 uiState.message?.let { msg ->
                     snackbarHostState.showSnackbar(msg)
                     viewModel.clearMessage()
+                }
+            }
+
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                val notifPermissionLauncher = rememberLauncherForActivityResult(
+                    contract = ActivityResultContracts.RequestPermission(),
+                    onResult = { isGranted ->
+                        if (isGranted) {
+                            QuickCleanNotificationHelper.showNotification(this@MainActivity)
+                        }
+                    }
+                )
+                LaunchedEffect(Unit) {
+                    if (ContextCompat.checkSelfPermission(
+                            this@MainActivity,
+                            Manifest.permission.POST_NOTIFICATIONS
+                        ) != PackageManager.PERMISSION_GRANTED
+                    ) {
+                        notifPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
+                    }
                 }
             }
 
@@ -174,7 +201,8 @@ class MainActivity : ComponentActivity() {
                                     uiState = uiState,
                                     onSetThemeMode = { viewModel.setThemeMode(it) },
                                     onOpenBatterySettings = { viewModel.openBatterySettings() },
-                                    onOpenDoNotDisturbSettings = { viewModel.openDoNotDisturbSettings() }
+                                    onOpenDoNotDisturbSettings = { viewModel.openDoNotDisturbSettings() },
+                                    onToggleNotificationWidget = { viewModel.setNotificationWidgetEnabled(it) }
                                 )
                             }
                         }
